@@ -6,6 +6,7 @@ import com.example.donation.entity.User;
 import com.example.donation.mapper.UserMapper;
 import com.example.donation.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -51,5 +52,10 @@ public class UserService {
         return userRepository.findAll().stream()
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+    public UserResponseDTO findByEmail(String email) {
+        User u = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Email não encontrado: " + email));
+        return userMapper.toDTO(u);
     }
 }

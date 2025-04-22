@@ -8,6 +8,7 @@ import com.example.donation.mapper.DoacaoMapper;
 import com.example.donation.repository.DoacaoRepository;
 import com.example.donation.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,4 +57,13 @@ public class DoacaoService {
     public void delete(Long id) {
         doacaoRepository.deleteById(id);
     }
+    public Long countByEmail(String email) {
+        User u = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
+        return doacaoRepository.countByUsuarioId(u.getId());
+    }
 }
+
+
+
+

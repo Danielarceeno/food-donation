@@ -51,4 +51,9 @@ public class DoacaoController {
         doacaoService.delete(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/me/count")
+    @PreAuthorize("hasRole('DOADOR')")
+    public ResponseEntity<Long> countMyDonations(@AuthenticationPrincipal UserDetails ud) {
+        return ResponseEntity.ok(doacaoService.countByEmail(ud.getUsername()));
+    }
 }
