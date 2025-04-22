@@ -1,0 +1,36 @@
+package com.example.donation.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "itens_solicitados")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ItemSolicitado {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String titulo;
+    private String descricao;
+
+    @Enumerated(EnumType.STRING)
+    private Categoria categoria;
+
+    private LocalDateTime dataCriacao;
+
+    @ManyToOne
+    @JoinColumn(name = "instituicao_id")
+    private User solicitante;
+
+    @PrePersist
+    public void prePersist() {
+        this.dataCriacao = LocalDateTime.now();
+    }
+}
