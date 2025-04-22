@@ -1,4 +1,4 @@
-package com.donation.donation;
+package com.example.donation;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
