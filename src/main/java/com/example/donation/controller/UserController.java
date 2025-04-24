@@ -44,7 +44,12 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> whoAmI(@AuthenticationPrincipal UserDetails ud) {
         return ResponseEntity.ok(userService.findByEmail(ud.getUsername()));
     }
-
+    @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponseDTO> updateMe(@AuthenticationPrincipal UserDetails ud,
+                                                    @RequestBody UserRequestDTO dto) {
+        return ResponseEntity.ok(userService.updateProfile(ud.getUsername(), dto));
+    }
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());

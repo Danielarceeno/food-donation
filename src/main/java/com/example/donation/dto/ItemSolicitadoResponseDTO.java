@@ -14,4 +14,5 @@ public class ItemSolicitadoResponseDTO {
     private String solicitanteNome;
     private String dataCriacao;
     private List<String> pontosArrecadacao;
+    private Long doacoesRecebidas;
 }

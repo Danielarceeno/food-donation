@@ -56,4 +56,11 @@ public class DoacaoController {
     public ResponseEntity<Long> countMyDonations(@AuthenticationPrincipal UserDetails ud) {
         return ResponseEntity.ok(doacaoService.countByEmail(ud.getUsername()));
     }
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('DOADOR')")
+    public ResponseEntity<List<DoacaoResponseDTO>> listMyDonations(
+            @AuthenticationPrincipal UserDetails ud
+    ) {
+        return ResponseEntity.ok(doacaoService.listMyDonations(ud.getUsername()));
+    }
 }

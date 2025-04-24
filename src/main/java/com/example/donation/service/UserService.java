@@ -58,4 +58,25 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("Email não encontrado: " + email));
         return userMapper.toDTO(u);
     }
+    public UserResponseDTO updateProfile(String email, UserRequestDTO dto) {
+        User u = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Email não encontrado: " + email));
+
+        // Atualiza campos permitidos
+        u.setNomeCompleto(dto.getNomeCompleto());
+        u.setEmail(dto.getEmail());
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            u.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
+        u.setCidade(dto.getCidade());
+        u.setBairro(dto.getBairro());
+        u.setRua(dto.getRua());
+        u.setNumero(dto.getNumero());
+        u.setTelefone(dto.getTelefone());
+        // só instituições vão ter CNPJ no DTO; em DOADOR dto.getCnpj() pode ser nulo
+        u.setCnpj(dto.getCnpj());
+
+        User updated = userRepository.save(u);
+        return userMapper.toDTO(updated);
+    }
 }

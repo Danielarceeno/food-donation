@@ -62,6 +62,15 @@ public class DoacaoService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
         return doacaoRepository.countByUsuarioId(u.getId());
     }
+    public List<DoacaoResponseDTO> listMyDonations(String email) {
+        User u = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
+        return doacaoRepository.findByUsuarioId(u.getId())
+                .stream()
+                .map(doacaoMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
 }
 
 

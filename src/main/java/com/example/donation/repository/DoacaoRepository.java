@@ -7,4 +7,5 @@ import java.util.List;
 public interface DoacaoRepository extends JpaRepository<Doacao, Long> {
     List<Doacao> findByUsuarioId(Long usuarioId);
     Long countByUsuarioId(Long usuarioId);
+    Long countByItemSolicitadoId(Long itemId);
 }

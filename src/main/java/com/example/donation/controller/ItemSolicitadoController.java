@@ -50,4 +50,16 @@ public class ItemSolicitadoController {
     ) {
         return ResponseEntity.ok(service.update(id, dto, ud.getUsername()));
     }
+
+    //DELETE /api/itens/{id} — só INSTITUIÇÃO e só o próprio solicitante
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('INSTITUICAO')")
+    public ResponseEntity<Void> delete(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails ud
+    ) {
+        service.delete(id, ud.getUsername());
+        return ResponseEntity.noContent().build();
+    }
 }

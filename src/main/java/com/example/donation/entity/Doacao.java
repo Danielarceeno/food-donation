@@ -24,4 +24,8 @@ public class Doacao {
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private User usuario; // Relacionamento com doador
+
+    @ManyToOne
+    @JoinColumn(name = "item_solicitado_id")
+    private ItemSolicitado itemSolicitado; // a qual solicitação responde
 }
