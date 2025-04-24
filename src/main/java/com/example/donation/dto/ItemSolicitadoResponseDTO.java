@@ -2,6 +2,7 @@ package com.example.donation.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import java.util.List;
 
 @Data
 @Builder
@@ -11,5 +12,6 @@ public class ItemSolicitadoResponseDTO {
     private String descricao;
     private String categoria;
     private String solicitanteNome;
-    private String dataCriacao; // ex: "2025-04-24T15:30:00"
+    private String dataCriacao;
+    private List<String> pontosArrecadacao;
 }

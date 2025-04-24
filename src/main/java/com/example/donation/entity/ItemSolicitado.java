@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.*;
 
 @Entity
 @Table(name = "itens_solicitados")
@@ -28,6 +29,13 @@ public class ItemSolicitado {
     @ManyToOne
     @JoinColumn(name = "instituicao_id")
     private User solicitante;
+
+    @OneToMany(
+            mappedBy = "item",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<PontoArrecadacao> pontosArrecadacao = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
