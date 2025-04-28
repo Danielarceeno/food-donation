@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface ItemSolicitadoRepository extends JpaRepository<ItemSolicitado, Long> {
     List<ItemSolicitado> findByTituloContainingIgnoreCase(String titulo);
+    List<ItemSolicitado> findBySolicitanteEmail(String email);
 }

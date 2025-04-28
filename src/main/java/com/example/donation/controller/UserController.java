@@ -4,11 +4,15 @@ import com.example.donation.dto.UserRequestDTO;
 import com.example.donation.dto.UserResponseDTO;
 import com.example.donation.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -44,12 +48,27 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> whoAmI(@AuthenticationPrincipal UserDetails ud) {
         return ResponseEntity.ok(userService.findByEmail(ud.getUsername()));
     }
+
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponseDTO> updateMe(@AuthenticationPrincipal UserDetails ud,
                                                     @RequestBody UserRequestDTO dto) {
         return ResponseEntity.ok(userService.updateProfile(ud.getUsername(), dto));
     }
+
+    /**
+     * Endpoint para upload de avatar ou logo do usuário autenticado.
+     */
+    @PostMapping(path = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponseDTO> uploadAvatar(
+            @AuthenticationPrincipal UserDetails ud,
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
+        UserResponseDTO dto = userService.uploadAvatar(ud.getUsername(), file);
+        return ResponseEntity.ok(dto);
+    }
+
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());

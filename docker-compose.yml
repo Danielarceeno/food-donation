@@ -5,7 +5,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    # carrega todas as chaves do seu .env
+    env_file:
+      - .env
     environment:
+      # Sobrescreve (se necessário) ou repete apenas as específicas
       - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
@@ -13,7 +17,16 @@ services:
       - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM}
       - SECURITY_JWT_TOKEN_SECRET_KEY=${JWT_SECRET_KEY}
       - SECURITY_JWT_TOKEN_EXPIRE_LENGTH=${JWT_TOKEN_VALIDITY}
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
+
+      # Email/Scheduler
+      - SPRING_MAIL_HOST=${SPRING_MAIL_HOST}
+      - SPRING_MAIL_PORT=${SPRING_MAIL_PORT}
+      - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
+      - SPRING_MAIL_SMTP_AUTH=${SPRING_MAIL_SMTP_AUTH}
+      - SPRING_MAIL_SMTP_STARTTLS=${SPRING_MAIL_SMTP_STARTTLS}
+      - MAIL_SCHEDULE_CRON=${MAIL_SCHEDULE_CRON}
+
     depends_on:
       db:
         condition: service_healthy

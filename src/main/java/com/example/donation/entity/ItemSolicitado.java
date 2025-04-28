@@ -35,6 +35,7 @@ public class ItemSolicitado {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<PontoArrecadacao> pontosArrecadacao = new ArrayList<>();
 
     @PrePersist

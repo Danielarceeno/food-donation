@@ -39,7 +39,8 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // públicos
-                        .requestMatchers("/", "/api/auth/**", "/api/users", "/swagger-ui/**", "/v3/api-docs/**")
+                        .requestMatchers("/", "/api/auth/**", "/api/users", "/swagger-ui/**", "/v3/api-docs/**", "/api/auth/forgot-password",    // <— liberei aqui
+                                "/api/auth/reset-password")
                         .permitAll()
 
                         // lista itens
@@ -65,6 +66,7 @@ public class SecurityConfig {
 
                         // qualquer outra
                         .anyRequest().authenticated()
+
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

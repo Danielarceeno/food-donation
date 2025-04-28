@@ -10,26 +10,19 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class User {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String nomeCompleto;
-
     @Column(unique = true)
     private String email;
-
     private String senha;
-
     @Enumerated(EnumType.STRING)
     private UserType tipo;
-
     private String cidade;
     private String bairro;
     private String rua;
     private String numero;
     private String telefone;
-
-    private String cnpj; // só se for INSTITUICAO
+    private String cnpj;
+    private String avatarUrl;
 }

@@ -17,4 +17,5 @@ public class UserResponseDTO {
     private String numero;
     private String telefone;
     private String cnpj;
+    private String avatarUrl;
 }
