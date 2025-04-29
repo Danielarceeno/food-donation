@@ -1,5 +1,6 @@
 package com.example.donation.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -7,8 +8,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,63 +20,64 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
-
-    public SecurityConfig(JwtTokenProvider jwtTokenProvider,
-                          UserDetailsService userDetailsService) {
-        this.jwtTokenProvider   = jwtTokenProvider;
-        this.userDetailsService = userDetailsService;
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         var jwtFilter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService);
 
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        // públicos
-                        .requestMatchers("/", "/api/auth/**", "/api/users", "/swagger-ui/**", "/v3/api-docs/**", "/api/auth/forgot-password",    // <— liberei aqui
-                                "/api/auth/reset-password")
-                        .permitAll()
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
 
-                        // lista itens
-                        .requestMatchers(HttpMethod.GET, "/api/itens/**").authenticated()
+                // ─── ENDPOINTS PÚBLICOS ────────────────────────────────────────────────
+                .requestMatchers(
+                    "/",
+                    "/api/auth/**",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**"
+                ).permitAll()
 
-                        // CRUD itens (só instituição)
-                        .requestMatchers(HttpMethod.POST, "/api/itens/**").hasRole("INSTITUICAO")
-                        .requestMatchers(HttpMethod.PUT,  "/api/itens/**").hasRole("INSTITUICAO")
-                        .requestMatchers(HttpMethod.DELETE, "/api/itens/**").hasRole("INSTITUICAO")
+                // permitir cadastro de usuário (doadores / instituições)
+                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
 
-                        // listar minhas doações (só DOADOR)
-                        .requestMatchers(HttpMethod.GET, "/api/doacoes/me").hasRole("DOADOR")
-                        // criar doação (só DOADOR)
-                        .requestMatchers(HttpMethod.POST, "/api/doacoes").hasRole("DOADOR")
-                        // consultam restante das doações (instituição/admin)
-                        .requestMatchers(HttpMethod.GET,    "/api/doacoes/**").hasAnyRole("INSTITUICAO","ADMIN")
-                        .requestMatchers(HttpMethod.PUT,    "/api/doacoes/**").hasRole("DOADOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/doacoes/**").hasAnyRole("DOADOR","ADMIN")
+                // ─── ITENS SOLICITADOS ────────────────────────────────────────────────
+                .requestMatchers(HttpMethod.GET,    "/api/itens/**").authenticated()
+                .requestMatchers(HttpMethod.POST,   "/api/itens/**").hasRole("INSTITUICAO")
+                .requestMatchers(HttpMethod.PUT,    "/api/itens/**").hasRole("INSTITUICAO")
+                .requestMatchers(HttpMethod.DELETE, "/api/itens/**").hasRole("INSTITUICAO")
 
-                        // perfil
-                        .requestMatchers(HttpMethod.GET,  "/api/users/me").authenticated()
-                        .requestMatchers(HttpMethod.PUT,  "/api/users/me").authenticated()
+                // ─── DOAÇÕES ──────────────────────────────────────────────────────────
+                .requestMatchers(HttpMethod.GET,    "/api/doacoes/me").hasRole("DOADOR")
+                .requestMatchers(HttpMethod.POST,   "/api/doacoes").hasRole("DOADOR")
+                .requestMatchers(HttpMethod.GET,    "/api/doacoes").hasAnyRole("INSTITUICAO","ADMIN")
+                .requestMatchers(HttpMethod.PUT,    "/api/doacoes/*").hasRole("DOADOR")
+                .requestMatchers(HttpMethod.DELETE, "/api/doacoes/*").hasAnyRole("DOADOR","ADMIN")
 
-                        // qualquer outra
-                        .anyRequest().authenticated()
+                // ─── PERFIL (usuário logado) ─────────────────────────────────────────
+                .requestMatchers(HttpMethod.GET,  "/api/users/me").authenticated()
+                .requestMatchers(HttpMethod.PUT,  "/api/users/me").authenticated()
 
-                )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                // ─── ADMIN ONLY (listagem completa e remoção) ────────────────────────
+                .requestMatchers(HttpMethod.GET,    "/api/users/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+
+                // ─── QUALQUER OUTRA ────────────────────────────────────────────────────
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authConfig
+        AuthenticationConfiguration authConfig
     ) throws Exception {
         return authConfig.getAuthenticationManager();
     }

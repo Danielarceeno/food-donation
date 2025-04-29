@@ -42,13 +42,13 @@ public class UserService {
 
     public UserResponseDTO getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
         return userMapper.toDTO(user);
     }
 
     public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
         userMapper.updateEntityFromDto(dto, user);
         if (dto.getSenha() != null && !dto.getSenha().isEmpty()) {
             user.setSenha(passwordEncoder.encode(dto.getSenha()));
@@ -63,19 +63,19 @@ public class UserService {
 
     public List<UserResponseDTO> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(userMapper::toDTO)
-                .collect(Collectors.toList());
+            .map(userMapper::toDTO)
+            .collect(Collectors.toList());
     }
 
     public UserResponseDTO findByEmail(String email) {
         User u = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email não encontrado: " + email));
+            .orElseThrow(() -> new UsernameNotFoundException("Email não encontrado: " + email));
         return userMapper.toDTO(u);
     }
 
     public UserResponseDTO updateProfile(String email, UserRequestDTO dto) {
         User u = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email não encontrado: " + email));
+            .orElseThrow(() -> new UsernameNotFoundException("Email não encontrado: " + email));
 
         u.setNomeCompleto(dto.getNomeCompleto());
         u.setEmail(dto.getEmail());
@@ -98,7 +98,7 @@ public class UserService {
      */
     public UserResponseDTO uploadAvatar(String email, MultipartFile file) throws IOException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
+            .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
 
         String filename = UUID.randomUUID().toString() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
         Path targetLocation = Paths.get(uploadDir).toAbsolutePath().normalize().resolve(filename);

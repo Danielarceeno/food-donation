@@ -31,9 +31,9 @@ public class ItemSolicitado {
     private User solicitante;
 
     @OneToMany(
-            mappedBy = "item",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+        mappedBy = "item",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
     )
     @Builder.Default
     private List<PontoArrecadacao> pontosArrecadacao = new ArrayList<>();

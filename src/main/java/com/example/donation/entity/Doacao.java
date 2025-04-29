@@ -3,7 +3,6 @@ package com.example.donation.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-
 @Entity
 @Table(name = "doacoes")
 @Data
@@ -18,14 +17,18 @@ public class Doacao {
 
     private String titulo;
     private String descricao;
-    private String categoria;
-    private String status; // Ex: PENDENTE, CONFIRMADA
+
+    @Enumerated(EnumType.STRING)
+    private Categoria categoria;
+
+    @Enumerated(EnumType.STRING)
+    private StatusDoacao status;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
-    private User usuario; // Relacionamento com doador
+    private User usuario;
 
     @ManyToOne
     @JoinColumn(name = "item_solicitado_id")
-    private ItemSolicitado itemSolicitado; // a qual solicitação responde
+    private ItemSolicitado itemSolicitado;
 }

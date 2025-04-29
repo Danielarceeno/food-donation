@@ -1,7 +1,10 @@
 package com.example.donation.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -12,7 +15,10 @@ public class ItemSolicitadoResponseDTO {
     private String descricao;
     private String categoria;
     private String solicitanteNome;
-    private String dataCriacao;
+
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+    private LocalDateTime dataCriacao;
+
     private List<String> pontosArrecadacao;
     private Long doacoesRecebidas;
 }

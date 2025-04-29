@@ -36,17 +36,17 @@ public class PasswordResetService {
      */
     public void forgotPassword(ForgotPasswordRequestDTO dto) {
         User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email não encontrado: " + dto.getEmail()));
+            .orElseThrow(() -> new RuntimeException("Email não encontrado: " + dto.getEmail()));
 
         // Gera token
         String token = UUID.randomUUID().toString();
         LocalDateTime expiry = LocalDateTime.now().plusSeconds(tokenValidityMillis / 1000);
 
         PasswordResetToken prt = PasswordResetToken.builder()
-                .token(token)
-                .user(user)
-                .expiryDate(expiry)
-                .build();
+            .token(token)
+            .user(user)
+            .expiryDate(expiry)
+            .build();
         tokenRepository.save(prt);
 
         // Envia e-mail
@@ -57,9 +57,10 @@ public class PasswordResetService {
         msg.setText("Para redefinir sua senha, clique no link abaixo:\n" + link + "\nEste link expira em 1 hora.");
         mailSender.send(msg);
     }
+
     public void resetPassword(ResetPasswordRequestDTO dto) {
         PasswordResetToken prt = tokenRepository.findByToken(dto.getToken())
-                .orElseThrow(() -> new RuntimeException("Token inválido ou expirado."));
+            .orElseThrow(() -> new RuntimeException("Token inválido ou expirado."));
 
         if (prt.getExpiryDate().isBefore(LocalDateTime.now())) {
             tokenRepository.delete(prt);

@@ -27,9 +27,9 @@ public class ScheduledEmailService {
     public void sendPendingItemsEmail() {
         // Extrai e-mails únicos de todas as solicitações
         List<String> emails = itemRepo.findAll().stream()
-                .map(item -> item.getSolicitante().getEmail())
-                .distinct()
-                .collect(Collectors.toList());
+            .map(item -> item.getSolicitante().getEmail())
+            .distinct()
+            .collect(Collectors.toList());
 
         for (String email : emails) {
             List<ItemSolicitado> itens = itemRepo.findBySolicitanteEmail(email);
@@ -40,10 +40,10 @@ public class ScheduledEmailService {
             body.append("Olá!\n");
             body.append("Segue a lista de itens que você cadastrou:\n\n");
             itens.forEach(i -> body.append("- ")
-                    .append(i.getTitulo())
-                    .append(" : ")
-                    .append(i.getDescricao())
-                    .append("\n"));
+                .append(i.getTitulo())
+                .append(" : ")
+                .append(i.getDescricao())
+                .append("\n"));
             body.append("\nPor favor, verifique se já recebeu algum deles e atualize no sistema.\n");
 
             // Envia e-mail

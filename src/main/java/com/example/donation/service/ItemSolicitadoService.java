@@ -66,7 +66,7 @@ public class ItemSolicitadoService {
     }
 
     /**
-     * Busca por ID e retorna um DTO com todos os detalhes (incluindo pontos de arrecadação).
+     * Busca por ID e retorna um DTO com todos os detalhes (incluindo pontos e data formatada).
      */
     public ItemSolicitadoResponseDTO getById(Long id) {
         ItemSolicitado item = repo.findById(id)
@@ -81,13 +81,10 @@ public class ItemSolicitadoService {
         ItemSolicitado item = repo.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Item não encontrado: " + id));
 
-        // opcional: valida se item.getSolicitante().getEmail().equals(emailInstituicao)
-
         item.setTitulo(dto.getTitulo());
         item.setDescricao(dto.getDescricao());
         item.setCategoria(Categoria.valueOf(dto.getCategoria()));
 
-        // sincroniza pontos: remove todos e adiciona de novo
         item.getPontosArrecadacao().clear();
         dto.getPontosArrecadacao().forEach(endereco -> {
             PontoArrecadacao p = new PontoArrecadacao();
@@ -115,7 +112,7 @@ public class ItemSolicitadoService {
     }
 
     /**
-     * Constrói o DTO de resposta, incluindo pontos de arrecadação e contagem de doações recebidas.
+     * Constrói o DTO de resposta, incluindo pontos, contagem e a data como LocalDateTime.
      */
     private ItemSolicitadoResponseDTO toDTO(ItemSolicitado i) {
         long countRecebidas = doacaoRepo.countByItemSolicitadoId(i.getId());
@@ -126,7 +123,7 @@ public class ItemSolicitadoService {
                 .descricao(i.getDescricao())
                 .categoria(i.getCategoria().name())
                 .solicitanteNome(i.getSolicitante().getNomeCompleto())
-                .dataCriacao(i.getDataCriacao().toString())
+                .dataCriacao(i.getDataCriacao())    // <-- aqui é LocalDateTime
                 .pontosArrecadacao(
                         i.getPontosArrecadacao().stream()
                                 .map(PontoArrecadacao::getEndereco)

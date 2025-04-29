@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface DoacaoMapper {
+
     @Mapping(source = "usuario.email", target = "doadorEmail")
     DoacaoResponseDTO toDTO(Doacao entity);
 }

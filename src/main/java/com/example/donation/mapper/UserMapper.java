@@ -11,16 +11,16 @@ public interface UserMapper {
     User toEntity(UserRequestDTO dto);
 
     @Mappings({
-            @Mapping(source = "id", target = "id"),
-            @Mapping(source = "avatarUrl", target = "avatarUrl"),
-            @Mapping(target = "cnpj", source = "cnpj")
+        @Mapping(source = "id", target = "id"),
+        @Mapping(source = "avatarUrl", target = "avatarUrl"),
+        @Mapping(target = "cnpj", source = "cnpj")
     })
     UserResponseDTO toDTO(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mappings({
-            @Mapping(target = "id", ignore = true),
-            @Mapping(target = "avatarUrl", ignore = true)
+        @Mapping(target = "id", ignore = true),
+        @Mapping(target = "avatarUrl", ignore = true)
     })
     void updateEntityFromDto(UserRequestDTO dto, @MappingTarget User user);
 }
