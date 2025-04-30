@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,20 +37,38 @@ public class UserController {
     })
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(
-        @RequestBody UserRequestDTO dto
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Exemplo de criação de usuário",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name    = "CreateUserExample",
+                    summary = "Novo usuário",
+                    value   = "{\n" +
+                        "  \"nomeCompleto\": \"João Silva\",\n" +
+                        "  \"email\": \"joao@example.com\",\n" +
+                        "  \"senha\": \"senha123\",\n" +
+                        "  \"tipo\": \"DOADOR\",\n" +
+                        "  \"cidade\": \"São Paulo\",\n" +
+                        "  \"bairro\": \"Centro\",\n" +
+                        "  \"rua\": \"Rua X\",\n" +
+                        "  \"numero\": \"100\",\n" +
+                        "  \"telefone\": \"11999999999\",\n" +
+                        "  \"cnpj\": \"\"\n" +
+                        "}"
+                )
+            )
+        )
+        @Valid @RequestBody UserRequestDTO dto
     ) {
         return ResponseEntity.ok(userService.createUser(dto));
     }
 
     @Operation(summary = "Busca usuário por ID")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Usuário encontrado"),
-        @ApiResponse(responseCode = "404", description = "ID não existe")
-    })
+    @ApiResponse(responseCode = "200", description = "Usuário encontrado")
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> getUserById(
-        @PathVariable Long id
-    ) {
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
@@ -59,34 +80,39 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(
         @PathVariable Long id,
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Exemplo de atualização de usuário",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name    = "UpdateUserExample",
+                    summary = "Alteração de usuário",
+                    value   = "{\n" +
+                        "  \"nomeCompleto\": \"João S. Atualizado\",\n" +
+                        "  \"email\": \"joao_new@example.com\",\n" +
+                        "  \"senha\": \"novaSenha123\",\n" +
+                        "  \"tipo\": \"INSTITUICAO\",\n" +
+                        "  \"cidade\": \"Orleans\",\n" +
+                        "  \"bairro\": \"Centro\",\n" +
+                        "  \"rua\": \"Rua Y\",\n" +
+                        "  \"numero\": \"200\",\n" +
+                        "  \"telefone\": \"11888888888\",\n" +
+                        "  \"cnpj\": \"12.345.678/0001-00\"\n" +
+                        "}"
+                )
+            )
+        )
         @RequestBody UserRequestDTO dto
     ) {
         return ResponseEntity.ok(userService.updateUser(id, dto));
     }
 
-    @Operation(summary = "Remove usuário (admin)")
-    @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Usuário excluído"),
-        @ApiResponse(responseCode = "404", description = "ID não existe")
-    })
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(
-        @PathVariable Long id
-    ) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @Operation(summary = "Dados do usuário autenticado")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Perfil retornado"),
-        @ApiResponse(responseCode = "401", description = "Não autenticado")
-    })
+    @ApiResponse(responseCode = "200", description = "Perfil retornado")
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserResponseDTO> whoAmI(
-        @AuthenticationPrincipal UserDetails ud
-    ) {
+    public ResponseEntity<UserResponseDTO> whoAmI(@AuthenticationPrincipal UserDetails ud) {
         return ResponseEntity.ok(userService.findByEmail(ud.getUsername()));
     }
 
@@ -99,34 +125,47 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponseDTO> updateMe(
         @AuthenticationPrincipal UserDetails ud,
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Exemplo de atualização de perfil",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name    = "UpdateMeExample",
+                    summary = "Alteração de perfil",
+                    value   = "{\n" +
+                        "  \"nomeCompleto\": \"Alice Maria\",\n" +
+                        "  \"email\": \"alice_new@example.com\",\n" +
+                        "  \"senha\": \"senhaSegura\",\n" +
+                        "  \"cidade\": \"Florianópolis\",\n" +
+                        "  \"bairro\": \"Trindade\",\n" +
+                        "  \"rua\": \"Rua Z\",\n" +
+                        "  \"numero\": \"300\",\n" +
+                        "  \"telefone\": \"11977777777\",\n" +
+                        "  \"cnpj\": \"\"\n" +
+                        "}"
+                )
+            )
+        )
         @RequestBody UserRequestDTO dto
     ) {
         return ResponseEntity.ok(userService.updateProfile(ud.getUsername(), dto));
     }
 
     @Operation(summary = "Upload de avatar/logo do usuário autenticado")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Avatar enviado"),
-        @ApiResponse(responseCode = "400", description = "Arquivo inválido"),
-        @ApiResponse(responseCode = "401", description = "Não autenticado")
-    })
+    @ApiResponse(responseCode = "200", description = "Avatar enviado")
     @PostMapping(path = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> uploadAvatar(
         @AuthenticationPrincipal UserDetails ud,
-        @RequestParam("file") MultipartFile file
+        @RequestPart("file") MultipartFile file
     ) throws IOException {
         return ResponseEntity.ok(userService.uploadAvatar(ud.getUsername(), file));
     }
 
     @Operation(summary = "Lista todos os usuários (admin)")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Lista de usuários"),
-        @ApiResponse(responseCode = "401", description = "Não autenticado"),
-        @ApiResponse(responseCode = "403", description = "Sem permissão")
-    })
+    @ApiResponse(responseCode = "200", description = "Lista de usuários")
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }

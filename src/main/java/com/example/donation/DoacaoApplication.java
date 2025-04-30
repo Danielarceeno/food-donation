@@ -24,7 +24,7 @@ public class DoacaoApplication {
             User user = User.builder()
                 .nomeCompleto("Daniel Arceno")
                 .email("daniel7ar@gmail.com")
-                .senha(new BCryptPasswordEncoder().encode("123"))
+                .senha(new BCryptPasswordEncoder().encode("123456"))
                 .tipo(UserType.ADMIN)
                 .cidade("São Paulo")
                 .build();

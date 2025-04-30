@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -34,6 +36,21 @@ public class AuthController {
     @Operation(summary = "Autentica usuário e retorna JWT")
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Exemplo de requisição",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name    = "LoginExample",
+                    summary = "Credenciais de login",
+                    value   = "{\n" +
+                        "  \"email\": \"alice@example.com\",\n" +
+                        "  \"senha\": \"senha123\"\n" +
+                        "}"
+                )
+            )
+        )
         @Valid @RequestBody LoginRequestDTO dto
     ) {
         Authentication auth = authenticationManager.authenticate(
@@ -53,6 +70,18 @@ public class AuthController {
     })
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Exemplo de requisição",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name    = "ForgotPasswordExample",
+                    summary = "Solicitação de recuperação",
+                    value   = "{ \"email\": \"alice@example.com\" }"
+                )
+            )
+        )
         @RequestBody ForgotPasswordRequestDTO dto
     ) {
         passwordResetService.forgotPassword(dto);
@@ -66,7 +95,22 @@ public class AuthController {
     })
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(
-        @RequestBody ResetPasswordRequestDTO dto
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Exemplo de requisição",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name    = "ResetPasswordExample",
+                    summary = "Redefinição de senha",
+                    value   = "{\n" +
+                        "  \"token\": \"febfb408-1e94-4a65-98f3-19eb47d4e499\",\n" +
+                        "  \"newPassword\": \"novaSenha123\"\n" +
+                        "}"
+                )
+            )
+        )
+        @Valid @RequestBody ResetPasswordRequestDTO dto
     ) {
         passwordResetService.resetPassword(dto);
         return ResponseEntity.ok("Senha redefinida com sucesso.");

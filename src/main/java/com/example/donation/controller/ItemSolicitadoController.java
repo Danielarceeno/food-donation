@@ -1,4 +1,3 @@
-// src/main/java/com/example/donation/controller/ItemSolicitadoController.java
 package com.example.donation.controller;
 
 import com.example.donation.dto.ItemSolicitadoRequestDTO;
@@ -8,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,8 +34,27 @@ public class ItemSolicitadoController {
         @ApiResponse(responseCode = "403", description = "Sem permissão (não é instituição)")
     })
     @PostMapping
-    @PreAuthorize("hasRole('INSTITUICAO')")
     public ResponseEntity<ItemSolicitadoResponseDTO> create(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Exemplo de criação de item solicitado",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name    = "CreateItemSolicitadoExample",
+                    summary = "Novo item solicitado",
+                    value   = "{\n" +
+                        "  \"titulo\": \"Leite NAN 1.0\",\n" +
+                        "  \"descricao\": \"Leite comprado em farmácia para crianças\",\n" +
+                        "  \"categoria\": \"ALIMENTO\",\n" +
+                        "  \"pontosArrecadacao\": [\n" +
+                        "    \"Rua A, 123\",\n" +
+                        "    \"Rua B, 456\"\n" +
+                        "  ]\n" +
+                        "}"
+                )
+            )
+        )
         @RequestBody ItemSolicitadoRequestDTO dto,
         @AuthenticationPrincipal UserDetails ud
     ) {
@@ -42,10 +62,7 @@ public class ItemSolicitadoController {
     }
 
     @Operation(summary = "Lista todas as solicitações (com busca opcional)")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Lista retornada"),
-        @ApiResponse(responseCode = "401", description = "Não autenticado")
-    })
+    @ApiResponse(responseCode = "200", description = "Lista retornada")
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ItemSolicitadoResponseDTO>> list(
@@ -62,9 +79,7 @@ public class ItemSolicitadoController {
     })
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ItemSolicitadoResponseDTO> getById(
-        @PathVariable Long id
-    ) {
+    public ResponseEntity<ItemSolicitadoResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
@@ -75,9 +90,27 @@ public class ItemSolicitadoController {
         @ApiResponse(responseCode = "404", description = "ID não encontrado")
     })
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('INSTITUICAO')")
     public ResponseEntity<ItemSolicitadoResponseDTO> update(
         @PathVariable Long id,
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Exemplo de atualização de item solicitado",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name    = "UpdateItemSolicitadoExample",
+                    summary = "Atualização de item solicitado",
+                    value   = "{\n" +
+                        "  \"titulo\": \"Leite NAN 1.0 (atualizado)\",\n" +
+                        "  \"descricao\": \"Leite para bebês até 1 ano\",\n" +
+                        "  \"categoria\": \"ALIMENTO\",\n" +
+                        "  \"pontosArrecadacao\": [\n" +
+                        "    \"Rua C, 789\"\n" +
+                        "  ]\n" +
+                        "}"
+                )
+            )
+        )
         @RequestBody ItemSolicitadoRequestDTO dto,
         @AuthenticationPrincipal UserDetails ud
     ) {
