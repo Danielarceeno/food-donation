@@ -33,9 +33,11 @@ public class UserController {
     @Operation(summary = "Cria um novo usuário")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Usuário criado"),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos")
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "403", description = "Não autorizado para criar ADMIN")
     })
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or #dto.tipo != T(com.example.donation.entity.UserType).ADMIN")
     public ResponseEntity<UserResponseDTO> createUser(
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Exemplo de criação de usuário",
@@ -166,6 +168,7 @@ public class UserController {
     @Operation(summary = "Lista todos os usuários (admin)")
     @ApiResponse(responseCode = "200", description = "Lista de usuários")
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }

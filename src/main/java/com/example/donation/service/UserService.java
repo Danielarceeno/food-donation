@@ -3,10 +3,14 @@ package com.example.donation.service;
 import com.example.donation.dto.UserRequestDTO;
 import com.example.donation.dto.UserResponseDTO;
 import com.example.donation.entity.User;
+import com.example.donation.entity.UserType;
 import com.example.donation.mapper.UserMapper;
 import com.example.donation.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,7 +37,15 @@ public class UserService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    public UserResponseDTO createUser(UserRequestDTO dto) {
+    public UserResponseDTO createUser(@Valid UserRequestDTO dto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth.getAuthorities().stream()
+            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (dto.getTipo() == UserType.ADMIN && !isAdmin) {
+            throw new SecurityException("Apenas ADMIN pode criar usuário ADMIN.");
+        }
+
         User user = userMapper.toEntity(dto);
         user.setSenha(passwordEncoder.encode(dto.getSenha()));
         User savedUser = userRepository.save(user);
