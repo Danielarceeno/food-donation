@@ -4,6 +4,7 @@ import com.example.donation.dto.ForgotPasswordRequestDTO;
 import com.example.donation.dto.ResetPasswordRequestDTO;
 import com.example.donation.entity.PasswordResetToken;
 import com.example.donation.entity.User;
+import com.example.donation.exception.InvalidTokenException;
 import com.example.donation.repository.PasswordResetTokenRepository;
 import com.example.donation.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -64,7 +65,7 @@ public class PasswordResetService {
 
         if (prt.getExpiryDate().isBefore(LocalDateTime.now())) {
             tokenRepository.delete(prt);
-            throw new RuntimeException("Token expirado.");
+            throw new InvalidTokenException("Token expirado.");
         }
 
         User user = prt.getUser();

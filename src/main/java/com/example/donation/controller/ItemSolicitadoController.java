@@ -2,6 +2,7 @@ package com.example.donation.controller;
 
 import com.example.donation.dto.ItemSolicitadoRequestDTO;
 import com.example.donation.dto.ItemSolicitadoResponseDTO;
+import com.example.donation.entity.Categoria;
 import com.example.donation.service.ItemSolicitadoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -9,16 +10,23 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
-@Tag(name = "Itens Solicitados", description = "CRUD de solicitações de itens")
+import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
+
+@Tag(name = "Itens Solicitados", description = "CRUD e busca paginada de solicitações de itens")
 @RestController
 @RequestMapping("/api/itens")
 @RequiredArgsConstructor
@@ -34,41 +42,32 @@ public class ItemSolicitadoController {
         @ApiResponse(responseCode = "403", description = "Sem permissão (não é instituição)")
     })
     @PostMapping
+    @PreAuthorize("hasRole('INSTITUICAO')")
     public ResponseEntity<ItemSolicitadoResponseDTO> create(
-        @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Exemplo de criação de item solicitado",
-            required = true,
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(
-                    name    = "CreateItemSolicitadoExample",
-                    summary = "Novo item solicitado",
-                    value   = "{\n" +
-                        "  \"titulo\": \"Leite NAN 1.0\",\n" +
-                        "  \"descricao\": \"Leite comprado em farmácia para crianças\",\n" +
-                        "  \"categoria\": \"ALIMENTO\",\n" +
-                        "  \"pontosArrecadacao\": [\n" +
-                        "    \"Rua A, 123\",\n" +
-                        "    \"Rua B, 456\"\n" +
-                        "  ]\n" +
-                        "}"
-                )
-            )
-        )
-        @RequestBody ItemSolicitadoRequestDTO dto,
+        @Valid @RequestBody ItemSolicitadoRequestDTO dto,
         @AuthenticationPrincipal UserDetails ud
     ) {
         return ResponseEntity.ok(service.create(dto, ud.getUsername()));
     }
 
-    @Operation(summary = "Lista todas as solicitações (com busca opcional)")
-    @ApiResponse(responseCode = "200", description = "Lista retornada")
+    @Operation(summary = "Lista itens com filtros, paginação e ordenação")
+    @ApiResponse(responseCode = "200", description = "Lista paginada de itens")
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<ItemSolicitadoResponseDTO>> list(
-        @RequestParam(value = "search", required = false) String search
+    public ResponseEntity<Page<ItemSolicitadoResponseDTO>> list(
+        @RequestParam(value = "search", required = false) String title,
+        @RequestParam(value = "categoria", required = false) Categoria categoria,
+        @RequestParam(value = "dataFrom", required = false)
+        @DateTimeFormat(iso = DATE_TIME) LocalDateTime dataFrom,
+        @RequestParam(value = "dataTo", required = false)
+        @DateTimeFormat(iso = DATE_TIME) LocalDateTime dataTo,
+        @RequestParam(value = "cidade", required = false) String cidade,
+        @PageableDefault(size = 10, sort = "dataCriacao") Pageable pageable
     ) {
-        return ResponseEntity.ok(service.listAll(search));
+        Page<ItemSolicitadoResponseDTO> page = service.search(
+            title, categoria, dataFrom, dataTo, cidade, pageable
+        );
+        return ResponseEntity.ok(page);
     }
 
     @Operation(summary = "Busca uma solicitação por ID")
@@ -90,28 +89,10 @@ public class ItemSolicitadoController {
         @ApiResponse(responseCode = "404", description = "ID não encontrado")
     })
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('INSTITUICAO') and @itemSolicitadoService.isOwner(#id, authentication.name)")
     public ResponseEntity<ItemSolicitadoResponseDTO> update(
         @PathVariable Long id,
-        @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Exemplo de atualização de item solicitado",
-            required = true,
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(
-                    name    = "UpdateItemSolicitadoExample",
-                    summary = "Atualização de item solicitado",
-                    value   = "{\n" +
-                        "  \"titulo\": \"Leite NAN 1.0 (atualizado)\",\n" +
-                        "  \"descricao\": \"Leite para bebês até 1 ano\",\n" +
-                        "  \"categoria\": \"ALIMENTO\",\n" +
-                        "  \"pontosArrecadacao\": [\n" +
-                        "    \"Rua C, 789\"\n" +
-                        "  ]\n" +
-                        "}"
-                )
-            )
-        )
-        @RequestBody ItemSolicitadoRequestDTO dto,
+        @Valid @RequestBody ItemSolicitadoRequestDTO dto,
         @AuthenticationPrincipal UserDetails ud
     ) {
         return ResponseEntity.ok(service.update(id, dto, ud.getUsername()));
@@ -120,11 +101,11 @@ public class ItemSolicitadoController {
     @Operation(summary = "Exclui uma solicitação de item")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Solicitação excluída"),
-        @ApiResponse(responseCode = "403", description = "Sem permissão"),
+        @ApiResponse(responseCode = "403", description = "Não é instituição ou não dono"),
         @ApiResponse(responseCode = "404", description = "ID não encontrado")
     })
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('INSTITUICAO')")
+    @PreAuthorize("hasRole('INSTITUICAO') and @itemSolicitadoService.isOwner(#id, authentication.name)")
     public ResponseEntity<Void> delete(
         @PathVariable Long id,
         @AuthenticationPrincipal UserDetails ud

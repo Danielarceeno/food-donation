@@ -36,15 +36,15 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
 
                 // ─── ENDPOINTS PÚBLICOS ────────────────────────────────────────────────
+                // permite cadastro livre de DOADORES/INSTITUIÇÕES
+                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                // login, recuperação de senha, swagger, home
                 .requestMatchers(
                     "/",
                     "/api/auth/**",
                     "/swagger-ui/**",
                     "/v3/api-docs/**"
                 ).permitAll()
-
-                // permitir cadastro de usuário (doadores / instituições)
-                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
 
                 // ─── ITENS SOLICITADOS ────────────────────────────────────────────────
                 .requestMatchers(HttpMethod.GET,    "/api/itens/**").authenticated()
@@ -59,11 +59,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT,    "/api/doacoes/*").hasRole("DOADOR")
                 .requestMatchers(HttpMethod.DELETE, "/api/doacoes/*").hasAnyRole("DOADOR","ADMIN")
 
-                // ─── PERFIL (usuário logado) ─────────────────────────────────────────
+                // ─── PERFIL (usuário autenticado) ────────────────────────────────────
                 .requestMatchers(HttpMethod.GET,  "/api/users/me").authenticated()
                 .requestMatchers(HttpMethod.PUT,  "/api/users/me").authenticated()
 
-                // ─── ADMIN ONLY (listagem completa e remoção) ────────────────────────
+                // ─── ADMIN ONLY ───────────────────────────────────────────────────────
                 .requestMatchers(HttpMethod.GET,    "/api/users/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
 

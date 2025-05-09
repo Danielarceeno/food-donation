@@ -82,7 +82,7 @@ public class AuthController {
                 )
             )
         )
-        @RequestBody ForgotPasswordRequestDTO dto
+        @Valid @RequestBody ForgotPasswordRequestDTO dto
     ) {
         passwordResetService.forgotPassword(dto);
         return ResponseEntity.ok("E-mail de recuperação enviado, verifique sua caixa de entrada.");

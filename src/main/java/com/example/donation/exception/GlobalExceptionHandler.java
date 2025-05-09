@@ -51,6 +51,25 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(apiError, HttpStatus.FORBIDDEN);
     }
+    @ExceptionHandler(EmailNotFoundException.class)
+    public ResponseEntity<ApiError> handleEmailNotFound(EmailNotFoundException ex) {
+        ApiError apiError = new ApiError(
+            HttpStatus.NOT_FOUND,
+            ex.getMessage(),
+            List.of("E-mail não cadastrado")
+        );
+        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ApiError> handleInvalidToken(InvalidTokenException ex) {
+        ApiError apiError = new ApiError(
+            HttpStatus.BAD_REQUEST,
+            ex.getMessage(),
+            List.of("Token inválido ou expirado")
+        );
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAll(Exception ex) {
