@@ -50,6 +50,5 @@ public class AdminInitializer {
             .build();
 
         userRepo.save(admin);
-        log.info("Usuário ADMIN criado automaticamente: {}", adminEmail);
     }
 }

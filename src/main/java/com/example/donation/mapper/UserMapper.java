@@ -13,7 +13,15 @@ public interface UserMapper {
     @Mappings({
         @Mapping(source = "id", target = "id"),
         @Mapping(source = "avatarUrl", target = "avatarUrl"),
-        @Mapping(target = "cnpj", source = "cnpj")
+        @Mapping(source = "nomeCompleto", target = "nomeCompleto"),
+        @Mapping(source = "email", target = "email"),
+        @Mapping(source = "tipo", target = "tipo"),
+        @Mapping(source = "cidade", target = "cidade"),
+        @Mapping(source = "bairro", target = "bairro"),
+        @Mapping(source = "rua", target = "rua"),
+        @Mapping(source = "numero", target = "numero"),
+        @Mapping(source = "telefone", target = "telefone"),
+        @Mapping(source = "cnpj", target = "cnpj")
     })
     UserResponseDTO toDTO(User user);
 
