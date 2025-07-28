@@ -4,6 +4,7 @@ import com.example.donation.dto.UserRequestDTO;
 import com.example.donation.dto.UserResponseDTO;
 import com.example.donation.entity.User;
 import com.example.donation.entity.UserType;
+import com.example.donation.exception.EmailAlreadyExistsException;
 import com.example.donation.mapper.UserMapper;
 import com.example.donation.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -38,6 +39,9 @@ public class UserService {
     private String uploadDir;
 
     public UserResponseDTO createUser(@Valid UserRequestDTO dto) {
+        userRepository.findByEmail(dto.getEmail()).ifPresent(user -> {
+            throw new EmailAlreadyExistsException(dto.getEmail());
+        });
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth.getAuthorities().stream()
             .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));

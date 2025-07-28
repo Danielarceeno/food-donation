@@ -51,6 +51,16 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(apiError, HttpStatus.FORBIDDEN);
     }
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
+        ApiError apiError = new ApiError(
+            HttpStatus.BAD_REQUEST,
+            "Erro de validação",
+            List.of(ex.getMessage())
+        );
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(EmailNotFoundException.class)
     public ResponseEntity<ApiError> handleEmailNotFound(EmailNotFoundException ex) {
         ApiError apiError = new ApiError(
