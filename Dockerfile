@@ -1,15 +1,21 @@
-# Usa JDK 17 leve
-FROM openjdk:17-alpine
+FROM maven:3.9.2-eclipse-temurin-17 AS build
 
-# Diretório de trabalho
 WORKDIR /app
 
-# Copia o jar empacotado para dentro da imagem
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
+COPY pom.xml .
 
-# Expõe a porta que o Spring Boot utiliza
+RUN mvn dependency:go-offline -B
+
+COPY src ./src
+
+RUN mvn clean package -DskipTests
+
+FROM openjdk:17-alpine
+
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
 EXPOSE 8080
 
-# Comando de inicialização
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
