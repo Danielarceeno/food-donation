@@ -16,14 +16,14 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(
     info = @Info(
         title = "API DoaçãoApp",
-        version = "1.1",
+        version = "1.1.1",
         description = "API para gerenciamento de doações, itens solicitados e usuários",
-        contact = @Contact(name = "Equipe DoaçãoApp", email = "suporte@doacaoapp.com"),
+        contact = @Contact(name = "Equipe DoaçãoApp", email = "daniel7ar@gmail.com"),
         license = @License(name = "MIT", url = "https://opensource.org/licenses/MIT")
     ),
     servers = {
         @Server(url = "http://localhost:8080", description = "Servidor Local (DEV)"),
-        @Server(url = "https://api.doacaoapp.com", description = "Servidor de Produção")
+        @Server(url = "https://food-donation-03ln.onrender.com", description = "Servidor de Produção")
     },
     security = @SecurityRequirement(name = "bearerAuth")
 )
