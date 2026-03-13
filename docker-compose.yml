@@ -27,9 +27,6 @@ services:
       - SPRING_MAIL_SMTP_STARTTLS=${SPRING_MAIL_SMTP_STARTTLS}
       - MAIL_SCHEDULE_CRON=${MAIL_SCHEDULE_CRON}
 
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       - app-network
 
@@ -42,10 +39,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+        test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-donation_kg0e_user} -d ${DB_NAME:-donation_kg0e}"]
     networks:
       - app-network
 
