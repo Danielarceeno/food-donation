@@ -5,6 +5,7 @@ import com.example.donation.dto.UserResponseDTO;
 import com.example.donation.entity.User;
 import com.example.donation.entity.UserType;
 import com.example.donation.exception.EmailAlreadyExistsException;
+import com.example.donation.exception.FileUploadException;
 import com.example.donation.mapper.UserMapper;
 import com.example.donation.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -34,6 +35,17 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private static final List<String> ALLOWED_MIME_TYPES = List.of(
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    );
+
+    private static final List<String> ALLOWED_EXTENSIONS = List.of(
+        ".jpg", ".jpeg", ".png", ".webp"
+    );
+
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB em bytes
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -113,17 +125,96 @@ public class UserService {
      * Faz upload de avatar e atualiza o campo avatarUrl do usuário.
      */
     public UserResponseDTO uploadAvatar(String email, MultipartFile file) throws IOException {
+        validateFile(file);
+
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
 
-        String filename = UUID.randomUUID().toString() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
-        Path targetLocation = Paths.get(uploadDir).toAbsolutePath().normalize().resolve(filename);
-        Files.createDirectories(targetLocation.getParent());
+        String fileExtension = extractSafeExtension(file.getOriginalFilename());
+        String filename = UUID.randomUUID().toString() + fileExtension;
+
+        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path targetLocation = uploadPath.resolve(filename);
+
+        Files.createDirectories(uploadPath);
+
+        // 4. Copia o arquivo com segurança
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
+        // 5. Atualiza URL do avatar no usuário
         String avatarUrl = "/uploads/" + filename;
         user.setAvatarUrl(avatarUrl);
+
         User updatedUser = userRepository.save(user);
         return userMapper.toDTO(updatedUser);
+    }
+
+    /**
+     * Valida o arquivo enviado quanto a tipo MIME, tamanho e extensão
+     */
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new FileUploadException("Arquivo não pode estar vazio");
+        }
+
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new FileUploadException(
+                "Arquivo muito grande. Tamanho máximo permitido: 5MB"
+            );
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
+            throw new FileUploadException(
+                "Tipo de arquivo não permitido. Permitidos: JPG, PNG, WEBP"
+            );
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !hasValidExtension(originalFilename)) {
+            throw new FileUploadException(
+                "Extensão de arquivo não permitida. Permitidas: .jpg, .jpeg, .png, .webp"
+            );
+        }
+
+        if (!extensionMatchesMimeType(originalFilename, contentType)) {
+            throw new FileUploadException(
+                "Extensão do arquivo não corresponde ao tipo de conteúdo detectado"
+            );
+        }
+    }
+
+    private String extractSafeExtension(String originalFilename) {
+        if (originalFilename == null || !originalFilename.contains(".")) {
+            return ".jpg"; // padrão seguro
+        }
+
+        String extension = originalFilename.substring(
+            originalFilename.lastIndexOf(".")
+        ).toLowerCase();
+
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
+            return ".jpg"; // fallback seguro
+        }
+
+        return extension;
+    }
+
+    private boolean hasValidExtension(String filename) {
+        return ALLOWED_EXTENSIONS.stream()
+            .anyMatch(ext -> filename.toLowerCase().endsWith(ext));
+    }
+
+    private boolean extensionMatchesMimeType(String filename, String mimeType) {
+        if (filename == null || mimeType == null) return false;
+
+        String ext = filename.substring(filename.lastIndexOf(".")).toLowerCase();
+
+        return switch (mimeType.toLowerCase()) {
+            case "image/jpeg" -> ext.equals(".jpg") || ext.equals(".jpeg");
+            case "image/png" -> ext.equals(".png");
+            case "image/webp" -> ext.equals(".webp");
+            default -> false;
+        };
     }
 }

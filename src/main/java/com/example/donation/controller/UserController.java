@@ -4,6 +4,7 @@ import com.example.donation.dto.UserRequestDTO;
 import com.example.donation.dto.UserResponseDTO;
 import com.example.donation.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -152,12 +153,21 @@ public class UserController {
         return ResponseEntity.ok(userService.updateProfile(ud.getUsername(), dto));
     }
 
-    @Operation(summary = "Upload de avatar/logo do usuário autenticado")
-    @ApiResponse(responseCode = "200", description = "Avatar enviado")
+    @Operation(
+        summary = "Upload de avatar/logo do usuário autenticado",
+        description = "Aceita apenas imagens JPG, PNG ou WEBP com máximo de 5MB"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Avatar enviado com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Arquivo inválido: tipo, tamanho ou extensão não permitidos"),
+        @ApiResponse(responseCode = "401", description = "Não autenticado"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado: apenas ADMIN")
+    })
     @PostMapping(path = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> uploadAvatar(
         @AuthenticationPrincipal UserDetails ud,
+        @Parameter(description = "Arquivo de imagem (JPG/PNG/WEBP, máx. 5MB)", required = true)
         @RequestPart("file") MultipartFile file
     ) throws IOException {
         return ResponseEntity.ok(userService.uploadAvatar(ud.getUsername(), file));
