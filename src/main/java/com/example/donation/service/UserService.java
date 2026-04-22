@@ -78,6 +78,11 @@ public class UserService {
     public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new UserNotFoundException(id));
+        if (!user.getEmail().equals(dto.getEmail())) {
+            userRepository.findByEmail(dto.getEmail()).ifPresent(existing -> {
+                throw new EmailAlreadyExistsException(dto.getEmail());
+            });
+        }
         userMapper.updateEntityFromDto(dto, user);
         if (dto.getSenha() != null && !dto.getSenha().isEmpty()) {
             user.setSenha(passwordEncoder.encode(dto.getSenha()));
@@ -105,6 +110,12 @@ public class UserService {
     public UserResponseDTO updateProfile(String email, UserRequestDTO dto) {
         User u = userRepository.findByEmail(email)
             .orElseThrow(() -> new EmailNotFoundException(email));
+
+        if (!email.equals(dto.getEmail())) {
+            userRepository.findByEmail(dto.getEmail()).ifPresent(existing -> {
+                throw new EmailAlreadyExistsException(dto.getEmail());
+            });
+        }
 
         u.setNomeCompleto(dto.getNomeCompleto());
         u.setEmail(dto.getEmail());
