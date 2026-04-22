@@ -52,6 +52,9 @@ public class UserService {
     private String uploadDir;
 
     public UserResponseDTO createUser(@Valid UserRequestDTO dto) {
+        if (dto.getSenha() == null || dto.getSenha().isBlank()) {
+            throw new IllegalArgumentException("Senha é obrigatória");
+        }
         userRepository.findByEmail(dto.getEmail()).ifPresent(user -> {
             throw new EmailAlreadyExistsException(dto.getEmail());
         });

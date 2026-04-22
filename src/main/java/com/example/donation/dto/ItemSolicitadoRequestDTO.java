@@ -3,7 +3,6 @@ package com.example.donation.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
@@ -25,6 +24,5 @@ public class ItemSolicitadoRequestDTO {
      * Cada elemento da lista também não pode ser vazio.
      */
     @NotEmpty(message = "É necessário pelo menos um ponto de arrecadação")
-    @Size(min = 1, message = "É necessário pelo menos um ponto de arrecadação")
-    private List<@NotBlank(message = "Endereço não pode ser vazio") String> pontosArrecadacao;
+    private List<@NotBlank(message = "Endereço do ponto de arrecadação não pode ser vazio") String> pontosArrecadacao;
 }

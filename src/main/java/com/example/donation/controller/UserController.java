@@ -112,7 +112,7 @@ public class UserController {
                 )
             )
         )
-        @RequestBody UserRequestDTO dto
+        @Valid @RequestBody UserRequestDTO dto
     ) {
         return ResponseEntity.ok(userService.updateUser(id, dto));
     }
@@ -156,7 +156,7 @@ public class UserController {
                 )
             )
         )
-        @RequestBody UserRequestDTO dto
+        @Valid @RequestBody UserRequestDTO dto
     ) {
         return ResponseEntity.ok(userService.updateProfile(ud.getUsername(), dto));
     }

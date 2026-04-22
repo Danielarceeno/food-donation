@@ -102,6 +102,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex) {
+        ApiError apiError = new ApiError(
+            HttpStatus.BAD_REQUEST,
+            ex.getMessage(),
+            List.of(ex.getMessage())
+        );
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(FileUploadException.class)
     public ResponseEntity<ApiError> handleFileUploadException(FileUploadException ex) {
         ApiError apiError = new ApiError(
