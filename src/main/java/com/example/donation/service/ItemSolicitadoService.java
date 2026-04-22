@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import com.example.donation.exception.EmailNotFoundException;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.criteria.Join;
@@ -32,7 +32,7 @@ public class ItemSolicitadoService {
 
     public ItemSolicitadoResponseDTO create(ItemSolicitadoRequestDTO dto, String emailInstituicao) {
         User inst = userRepo.findByEmail(emailInstituicao)
-            .orElseThrow(() -> new UsernameNotFoundException("Instituição não encontrada: " + emailInstituicao));
+            .orElseThrow(() -> new EmailNotFoundException(emailInstituicao));
         ItemSolicitado item = new ItemSolicitado();
         item.setTitulo(dto.getTitulo());
         item.setDescricao(dto.getDescricao());

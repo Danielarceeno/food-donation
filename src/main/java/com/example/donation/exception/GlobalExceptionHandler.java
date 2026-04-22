@@ -2,6 +2,7 @@ package com.example.donation.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -81,14 +82,24 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleAll(Exception ex) {
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiError> handleUserNotFound(UserNotFoundException ex) {
         ApiError apiError = new ApiError(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            "Erro interno inesperado",
-            List.of(ex.getMessage())
+            HttpStatus.NOT_FOUND,
+            ex.getMessage(),
+            List.of("Usuário não encontrado")
         );
-        return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ApiError> handleUsernameNotFound(UsernameNotFoundException ex) {
+        ApiError apiError = new ApiError(
+            HttpStatus.NOT_FOUND,
+            ex.getMessage(),
+            List.of("Usuário não encontrado")
+        );
+        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(FileUploadException.class)
@@ -99,5 +110,15 @@ public class GlobalExceptionHandler {
             List.of(ex.getMessage())
         );
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleAll(Exception ex) {
+        ApiError apiError = new ApiError(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "Erro interno inesperado",
+            List.of(ex.getMessage())
+        );
+        return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

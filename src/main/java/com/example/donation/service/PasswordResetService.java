@@ -4,6 +4,7 @@ import com.example.donation.dto.ForgotPasswordRequestDTO;
 import com.example.donation.dto.ResetPasswordRequestDTO;
 import com.example.donation.entity.PasswordResetToken;
 import com.example.donation.entity.User;
+import com.example.donation.exception.EmailNotFoundException;
 import com.example.donation.exception.InvalidTokenException;
 import com.example.donation.repository.PasswordResetTokenRepository;
 import com.example.donation.repository.UserRepository;
@@ -37,7 +38,7 @@ public class PasswordResetService {
      */
     public void forgotPassword(ForgotPasswordRequestDTO dto) {
         User user = userRepository.findByEmail(dto.getEmail())
-            .orElseThrow(() -> new RuntimeException("Email não encontrado: " + dto.getEmail()));
+            .orElseThrow(() -> new EmailNotFoundException(dto.getEmail()));
 
         // Gera token
         String token = UUID.randomUUID().toString();
@@ -61,7 +62,7 @@ public class PasswordResetService {
 
     public void resetPassword(ResetPasswordRequestDTO dto) {
         PasswordResetToken prt = tokenRepository.findByToken(dto.getToken())
-            .orElseThrow(() -> new RuntimeException("Token inválido ou expirado."));
+            .orElseThrow(() -> new InvalidTokenException("Token inválido ou expirado."));
 
         if (prt.getExpiryDate().isBefore(LocalDateTime.now())) {
             tokenRepository.delete(prt);

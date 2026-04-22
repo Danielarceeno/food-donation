@@ -5,7 +5,9 @@ import com.example.donation.dto.UserResponseDTO;
 import com.example.donation.entity.User;
 import com.example.donation.entity.UserType;
 import com.example.donation.exception.EmailAlreadyExistsException;
+import com.example.donation.exception.EmailNotFoundException;
 import com.example.donation.exception.FileUploadException;
+import com.example.donation.exception.UserNotFoundException;
 import com.example.donation.mapper.UserMapper;
 import com.example.donation.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -13,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -70,13 +71,13 @@ public class UserService {
 
     public UserResponseDTO getUserById(Long id) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+            .orElseThrow(() -> new UserNotFoundException(id));
         return userMapper.toDTO(user);
     }
 
     public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+            .orElseThrow(() -> new UserNotFoundException(id));
         userMapper.updateEntityFromDto(dto, user);
         if (dto.getSenha() != null && !dto.getSenha().isEmpty()) {
             user.setSenha(passwordEncoder.encode(dto.getSenha()));
@@ -97,13 +98,13 @@ public class UserService {
 
     public UserResponseDTO findByEmail(String email) {
         User u = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("Email não encontrado: " + email));
+            .orElseThrow(() -> new EmailNotFoundException(email));
         return userMapper.toDTO(u);
     }
 
     public UserResponseDTO updateProfile(String email, UserRequestDTO dto) {
         User u = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("Email não encontrado: " + email));
+            .orElseThrow(() -> new EmailNotFoundException(email));
 
         u.setNomeCompleto(dto.getNomeCompleto());
         u.setEmail(dto.getEmail());
@@ -128,7 +129,7 @@ public class UserService {
         validateFile(file);
 
         User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
+            .orElseThrow(() -> new EmailNotFoundException(email));
 
         String fileExtension = extractSafeExtension(file.getOriginalFilename());
         String filename = UUID.randomUUID().toString() + fileExtension;
