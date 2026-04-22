@@ -22,6 +22,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 import java.time.LocalDateTime;
 
 import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
@@ -36,7 +39,7 @@ public class ItemSolicitadoController {
 
     @Operation(summary = "Cria nova solicitação de item")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Solicitação criada"),
+        @ApiResponse(responseCode = "201", description = "Solicitação criada"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos"),
         @ApiResponse(responseCode = "401", description = "Não autenticado"),
         @ApiResponse(responseCode = "403", description = "Sem permissão (não é instituição)")
@@ -47,7 +50,12 @@ public class ItemSolicitadoController {
         @Valid @RequestBody ItemSolicitadoRequestDTO dto,
         @AuthenticationPrincipal UserDetails ud
     ) {
-        return ResponseEntity.ok(service.create(dto, ud.getUsername()));
+        ItemSolicitadoResponseDTO created = service.create(dto, ud.getUsername());
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(created.getId())
+            .toUri();
+        return ResponseEntity.created(location).body(created);
     }
 
     @Operation(summary = "Lista itens com filtros, paginação e ordenação")

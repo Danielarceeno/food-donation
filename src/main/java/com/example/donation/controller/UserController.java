@@ -20,7 +20,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 @Tag(name = "Usuários", description = "CRUD de usuários e perfil")
@@ -33,7 +36,7 @@ public class UserController {
 
     @Operation(summary = "Cria um novo usuário")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Usuário criado"),
+        @ApiResponse(responseCode = "201", description = "Usuário criado"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos")
     })
     @PostMapping
@@ -63,7 +66,12 @@ public class UserController {
         )
         @Valid @RequestBody UserRequestDTO dto
     ) {
-        return ResponseEntity.ok(userService.createUser(dto));
+        UserResponseDTO created = userService.createUser(dto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(created.getId())
+            .toUri();
+        return ResponseEntity.created(location).body(created);
     }
 
     @Operation(summary = "Busca usuário por ID")
